@@ -1,11 +1,8 @@
 package com.example.regularpong;
 
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
@@ -33,6 +30,7 @@ public class Pong extends Application {
     private static final double ballR = 15;      // radius of ball
     private int ballYSpeed = 1;                  // used for translating the ball vertically
     private int ballXSpeed = 1;                  // used for translating the ball horizontally
+    private int maxSpeed = 6;
     private Player player;
     private Player opponent;
     private double ballYPos = (double) height / 2;        // ball starting position, center of canvas
@@ -47,7 +45,7 @@ public class Pong extends Application {
 
     private void connectToServer() {
         try {
-            clientSock = new Socket("localhost", 6666);
+            clientSock = new Socket("99.226.202.88", 6666);
             in = new DataInputStream(clientSock.getInputStream());      // from server
             out = new DataOutputStream(clientSock.getOutputStream());  // to server
 
@@ -122,7 +120,7 @@ public class Pong extends Application {
                     this.out.writeDouble(player.getyPos());
                     this.out.flush();
                     try {
-                        Thread.sleep(5); // sleep thread for a couple milliseconds so the server isnt overwhelmed
+                        Thread.sleep(25); // sleep thread for a couple milliseconds so the server isnt overwhelmed
                     } catch (InterruptedException e) {
                         System.out.println("InterruptedException from WriteServer Runnable");
                     }
@@ -141,15 +139,15 @@ public class Pong extends Application {
     public void checkWinner(GraphicsContext gc, Timeline tl) {
         if (playerID == 1) {
             if (player.getScore() > opponent.getScore()) {     // player 1 wins
-                gc.strokeText("Player 1 Wins!", width / 2, height / 2);
+                gc.strokeText("You Win!", width / 2, height / 2);
             } else {
-                    gc.strokeText("Player 2 Wins!", width / 2, height / 2);
+                    gc.strokeText("You Lose.", width / 2, height / 2);
             }
         } else {
             if (player.getScore() > opponent.getScore()) {     // player 1 wins
-                gc.strokeText("Player 1 Wins!", width / 2, height / 2);
+                gc.strokeText("You Win!", width / 2, height / 2);
             } else {
-                gc.strokeText("Player 2 Wins!", width / 2, height / 2);
+                gc.strokeText("You Lose.", width / 2, height / 2);
             }
         }
 
@@ -322,7 +320,9 @@ public class Pong extends Application {
             }
 
             // if player hits the ball, ricochet the ball back in other direction at a 90-degree angle
-            hitBall();
+            if (ballXSpeed <= maxSpeed) {
+                hitBall();
+            }
         } else {
             if (!player.isReady()) {
                 gc.setStroke(Color.WHITE);
